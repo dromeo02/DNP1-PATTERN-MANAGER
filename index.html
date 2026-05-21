@@ -29,7 +29,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .loading-spinner{width:48px;height:48px;border:4px solid rgba(255,153,0,.3);border-top-color:var(--amz-orange);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .loading-text{color:#fff;font-size:.9rem;font-weight:600;}
-.loading-sub{color:rgba(255,255,255,.5);font-size:.75rem;margin-top:6px;}
+.loading-sub{color:rgba(255,255,255,.5);font-size:.75rem;margin-top:6px;}api.ca
 #offlineBanner{display:none;background:var(--warn);color:#fff;text-align:center;padding:6px;font-size:.78rem;font-weight:600;}
 #offlineBanner.show{display:block;}
 #syncIndicator{position:fixed;bottom:70px;right:20px;background:var(--amz-dark);color:#fff;border-radius:20px;padding:5px 12px;font-size:.72rem;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .3s;z-index:500;}
@@ -588,6 +588,31 @@ footer span{color:var(--amz-blue);font-weight:600;}
 const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbyUtAGBQ_3L23M3fTaExsYEPJTH2UKfL2AiZMLX9LXc_YuyUhJj57LHNBaJ0FXc3cRX/exec';
 const SYNC_INTERVAL=20000;
 
+const CACHE={
+  users:{},shifts:{},exceptions:[],requests:[],
+  publishedWeeks:[],notifications:{},ratings:{},publishedConfig:{},
+  ferieWindow:{open:false,dateFrom:'',dateTo:''},
+  save:function(){
+    try{
+      localStorage.setItem('DNP1_v3',JSON.stringify({
+        users:this.users,shifts:this.shifts,exceptions:this.exceptions,
+        requests:this.requests,publishedWeeks:this.publishedWeeks,
+        notifications:this.notifications
+      }));
+    }catch(e){}
+  },
+  load:function(){
+    try{
+      var d=JSON.parse(localStorage.getItem('DNP1_v3')||'{}');
+      if(d.users)this.users=d.users;
+      if(d.shifts)this.shifts=d.shifts;
+      if(d.exceptions)this.exceptions=d.exceptions;
+      if(d.requests)this.requests=d.requests;
+      if(d.publishedWeeks)this.publishedWeeks=d.publishedWeeks;
+      if(d.notifications)this.notifications=d.notifications;
+    }catch(e){}
+  }
+
 const API = {
   async call(action, data) {
     if (!data) data = {};
@@ -705,31 +730,6 @@ const API = {
   },
 };
 
-const CACHE={
-  users:{},shifts:{},exceptions:[],requests:[],
-  publishedWeeks:[],notifications:{},ratings:{},publishedConfig:{},
-  ferieWindow:{open:false,dateFrom:'',dateTo:''},
-  save:function(){
-    try{
-      localStorage.setItem('DNP1_v3',JSON.stringify({
-        users:this.users,shifts:this.shifts,exceptions:this.exceptions,
-        requests:this.requests,publishedWeeks:this.publishedWeeks,
-        notifications:this.notifications
-      }));
-    }catch(e){}
-  },
-  load:function(){
-    try{
-      var d=JSON.parse(localStorage.getItem('DNP1_v3')||'{}');
-      if(d.users)this.users=d.users;
-      if(d.shifts)this.shifts=d.shifts;
-      if(d.exceptions)this.exceptions=d.exceptions;
-      if(d.requests)this.requests=d.requests;
-      if(d.publishedWeeks)this.publishedWeeks=d.publishedWeeks;
-      if(d.notifications)this.notifications=d.notifications;
-    }catch(e){}
-  }
-};
 CACHE.load();
 
 const SHIFT_DEFS=[
