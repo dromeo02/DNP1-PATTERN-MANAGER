@@ -1192,29 +1192,84 @@ function renderRequests(){
   const wrap=document.getElementById('panelRequests');
   API.markRead(CU).catch(()=>{});
   if(CACHE.notifications[CU])CACHE.notifications[CU].forEach(n=>n.isRead='true');
+
   const myReqs=role()==='viewer'?CACHE.requests.filter(r=>r.login===CU):CACHE.requests;
-  const pending=myReqs.filter(r=>r.status==='pending'),others=myReqs.filter(r=>r.status!=='pending');
+  const pending=myReqs.filter(r=>r.status==='pending');
+  const others=myReqs.filter(r=>r.status!=='pending');
   const isViewer=role()==='viewer';
-  const typeLabels={cambio_riposo:'🔄 Cambio Riposo',inversione_turno:'🔁 Inversione Turno',ferie:'🏖️ Ferie',altro:'📝 Richiesta Generica'};
-  const btnHtml=isViewer?'<div class="panel-section" style="background:var(--amz-light);border-color:var(--amz-blue)"><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-weight:700;font-size:.88rem;color:var(--amz-dark)">Hai bisogno di qualcosa?</div><div style="font-size:.76rem;color:var(--muted);margin-top:2px">Invia una richiesta al tuo manager</div></div><button class="btn-orange" onclick="openNewRequest()">➕ Inserisci Richiesta</button></div></div>':'';
-  let html=btnHtml+'<div class="panel-section"><h3>📨 '+(isViewer?'Le mie richieste':'In attesa')+' ('+pending.length+')</h3>';
-  if(!pending.length)html+='<div style="color:var(--muted);font-size:.83rem">Nessuna richiesta in attesa.</div>';
+  const typeLabels={
+    cambio_riposo:'🔄 Cambio Riposo',
+    inversione_turno:'🔁 Inversione Turno',
+    ferie:'🏖️ Ferie',
+    altro:'📝 Richiesta Generica'
+  };
+
+  let html='<div class="panel-section">'+
+    '<h3>📨 Richieste'+
+    (isViewer?'<button class="btn-orange" onclick="openNewRequest()">➕ Inserisci Nuova Richiesta</button>':'')+
+    '</h3>';
+
+  // ── Sezione IN ATTESA ──────────────────────────────────
+  html+='<div style="font-size:.82rem;font-weight:700;color:var(--amz-dark);margin-bottom:8px">'+
+    (isViewer?'Le mie richieste in attesa':'In attesa')+
+    ' <span style="background:#fef3c7;color:#92400e;border-radius:20px;padding:2px 9px;font-size:.72rem;font-weight:700">'+pending.length+'</span></div>';
+
+  if(!pending.length){
+    html+='<div style="color:var(--muted);font-size:.83rem;padding:10px 0 6px">Nessuna richiesta in attesa.</div>';
+  }
+
   pending.forEach(req=>{
-    const u=CACHE.users[req.login],def=getShiftDef({type:req.type,start:req.start,end:req.end});
+    const u=CACHE.users[req.login];
+    const def=getShiftDef({type:req.type,start:req.start,end:req.end});
     const displayType=typeLabels[req.type]||def?.label||req.type;
-    html+='<div class="req-card"><div class="req-header"><span class="req-name">'+(u?.name||req.login)+'</span><span class="req-status st-pending">In attesa</span></div>'+
-      '<div class="req-detail">📅 '+fmtFull(pd(req.dstr))+'<br>'+displayType+'<br>📝 '+req.note+'</div>'+
+    html+='<div class="req-card">'+
+      '<div class="req-header">'+
+      '<span class="req-name">'+(u?.name||req.login)+'</span>'+
+      '<span class="req-status st-pending">⏳ In attesa</span>'+
+      '</div>'+
+      '<div class="req-detail">'+
+      '📅 '+fmtFull(pd(req.dstr))+'<br>'+
+      '<strong>'+displayType+'</strong><br>'+
+      '📝 '+req.note+
+      '</div>'+
       (req.validationIssues?'<div style="font-size:.7rem;color:var(--danger);margin-top:3px">⚠️ '+req.validationIssues.replace(/\|/g,' | ')+'</div>':'')+
       (isApprover()?'<div style="margin-top:7px"><button class="btn-primary" style="padding:4px 11px;font-size:.76rem" onclick="openApprove(\''+(req.id||'')+'\',\''+req.login+'\',\''+req.dstr+'\')">Gestisci</button></div>':'')+
       '</div>';
   });
-  html+='</div><div class="panel-section"><h3>📋 Storico ('+others.length+')</h3>';
-  if(!others.length)html+='<div style="color:var(--muted);font-size:.83rem">Nessuna richiesta elaborata.</div>';
+
+  // ── Separatore ────────────────────────────────────────
+  html+='<div style="border-top:1px solid var(--border);margin:14px 0"></div>';
+
+  // ── Sezione STORICO ───────────────────────────────────
+  html+='<div style="font-size:.82rem;font-weight:700;color:var(--amz-dark);margin-bottom:8px">'+
+    'Storico'+
+    ' <span style="background:#f3f4f6;color:var(--muted);border-radius:20px;padding:2px 9px;font-size:.72rem;font-weight:700">'+others.length+'</span></div>';
+
+  if(!others.length){
+    html+='<div style="color:var(--muted);font-size:.83rem;padding:10px 0 6px">Nessuna richiesta elaborata.</div>';
+  }
+
   others.slice().reverse().forEach(req=>{
     const u=CACHE.users[req.login];
-    html+='<div class="req-card"><div class="req-header"><span class="req-name">'+(u?.name||req.login)+'</span><span class="req-status st-'+req.status+'">'+(req.status==='approved'?'Approvata':'Rifiutata')+'</span></div><div class="req-detail">📅 '+fmtFull(pd(req.dstr))+' | '+(typeLabels[req.type]||req.type)+' | '+req.note+'</div></div>';
+    const displayType=typeLabels[req.type]||req.type;
+    const isApproved=req.status==='approved';
+    html+='<div class="req-card">'+
+      '<div class="req-header">'+
+      '<span class="req-name">'+(u?.name||req.login)+'</span>'+
+      '<span class="req-status '+(isApproved?'st-approved':'st-rejected')+'">'+(isApproved?'✅ Approvata':'❌ Rifiutata')+'</span>'+
+      '</div>'+
+      '<div class="req-detail">'+
+      '📅 '+fmtFull(pd(req.dstr))+' | '+displayType+'<br>'+
+      '📝 '+req.note+
+      (req.decidedBy?'<br><span style="font-size:.7rem;color:var(--muted)">Gestita da: '+(CACHE.users[req.decidedBy]?.name||req.decidedBy)+'</span>':'')+
+      '</div>'+
+      '</div>';
   });
-  html+='</div>';wrap.innerHTML=html;
+
+  html+='</div>';
+  wrap.innerHTML=html;
+}
+
 }
 function openApprove(id,login,dstr){
   approveCtx=id?CACHE.requests.find(r=>r.id===id):CACHE.requests.find(r=>r.login===login&&r.dstr===dstr&&r.status==='pending');
