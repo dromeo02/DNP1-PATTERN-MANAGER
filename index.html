@@ -588,7 +588,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1px;
+      row-gap: 1px;
+      column-gap: 1px;
       position: relative;
       cursor: pointer;
     }
@@ -610,36 +611,34 @@
       text-align: center;
     }
 
+    /* 8h shift variants use --ns-tx, --cs-tx, --cs-bd, etc. */
     .sc-ns {
       background: var(--ns-bg);
       border-color: var(--ns-bd);
       color: var(--ns-tx);
     }
-
-    .sc-ns7 {
-      background: var(--ns7-bg);
-      border-color: var(--ns7-bd);
-      color: var(--ns7-tx);
-    }
-
     .sc-cs {
       background: var(--cs-bg);
       border-color: var(--cs-bd);
       color: var(--cs-tx);
     }
-
-    .sc-cs7 {
-      background: var(--cs7-bg);
-      border-color: var(--cs7-bd);
-      color: var(--cs7-tx);
-    }
-
     .sc-pm {
       background: var(--cs-bg);
       border-color: var(--cs-bd);
       color: var(--cs-tx);
     }
 
+    /* 7h shift variants use their own color variables for clarity */
+    .sc-ns7 {
+      background: var(--ns7-bg);
+      border-color: var(--ns7-bd);
+      color: var(--ns7-tx);
+    }
+    .sc-cs7 {
+      background: var(--cs7-bg);
+      border-color: var(--cs7-bd);
+      color: var(--cs7-tx);
+    }
     .sc-pm7 {
       background: var(--cs7-bg);
       border-color: var(--cs7-bd);
@@ -1780,114 +1779,114 @@
     };
 
 
-const API = {
-        async call(action, data) {
-          if (!data) data = {};
-          try {
-            setSyncing(true);
-            var payload = Object.assign({}, data, { action: action });
-            var resp = await fetch(APPS_SCRIPT_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'text/plain' },
-              body: JSON.stringify(payload)
-            });
-            var json = await resp.json();
-            setSyncing(false);
-            if (!json.ok) throw new Error(json.error || 'Errore backend');
-            return json.data;
-          } catch (err) {
-            setSyncing(false);
-            console.error('[API]', action, err);
-            throw err;
-          }
-        },
-        login: function (u, p) { return API.call('login', { username: u, password: p }); },
-        changePwd: function (u, o, n) { return API.call('changePassword', { username: u, oldPassword: o, newPassword: n }); },
-        resetPwd: function (u, p, by, byPwd) { return API.call('resetPassword', { username: u, newPassword: p, requestedBy: by, requestedByPassword: byPwd }); },
-        getUsers: function (u, p) { return API.call('getUsers', { username: u, password: p }); },
-        saveUser: function (u, d, by, byPwd) { return API.call('saveUser', { username: u, userData: d, requestedBy: by, requestedByPassword: byPwd }); },
-        addUser: function (u, d, by, byPwd) { return API.call('addUser', { username: u, userData: d, requestedBy: by, requestedByPassword: byPwd }); },
-        deleteUser: function (u, by, byPwd) { return API.call('deleteUser', { username: u, requestedBy: by, requestedByPassword: byPwd }); },
-        getRatings: function (u, p) { return API.call('getRatings', { username: u, password: p }); },
-        saveRating: function (u, p, target, rating, notes) { return API.call('saveRating', { username: u, password: p, targetUser: target, rating: rating, notes: notes }); },
-        getShifts: function (f, t) { return API.call('getShifts', { dateFrom: f, dateTo: t }); },
-        saveShift: function (d, s, sh, by) { return API.call('saveShift', { dateStr: d, supervisor: s, shiftData: sh, updatedBy: by }); },
-        bulkImport: function (sh, by) { return API.call('bulkImport', { shifts: sh, importedBy: by }); },
-        clearShifts: function () { return API.call('clearShifts', {}); },
-        getExc: function () { return API.call('getExceptions', {}); },
-        saveExc: function (d, by) { return API.call('saveException', { exceptionData: d, createdBy: by }); },
-        deleteExc: function (id) { return API.call('deleteException', { exceptionId: id }); },
-        getReqs: function (l) { return API.call('getRequests', { login: l || '' }); },
-        saveReq: function (d) { return API.call('saveRequest', { requestData: d }); },
-        decideReq: function (id, by, ok) { return API.call('decideRequest', { requestId: id, decidedBy: by, approved: ok }); },
-        getPub: function () { return API.call('getPublished', {}); },
-        savePub: function (wks) { return API.call('savePublished', { publishedWeeks: wks }); },
-        getPubConfig: function () { return API.call('getPublishedConfig', {}); },
-        savePubConfig: function (wk, sups, pub) { return API.call('savePublishedConfig', { weekKey: wk, supervisors: sups, published: pub }); },
-        getNotifs: function (u) { return API.call('getNotifications', { toUser: u }); },
-        addNotif: function (to, msg, fr) { return API.call('addNotification', { toUser: to, message: msg, fromUser: fr }); },
-        markRead: function (u) { return API.call('markRead', { toUser: u }); },
-        slackCh: function (msg) { return API.call('slackChannel', { message: msg }); },
-        slackDM: function (u, msg) { return API.call('slackDM', { username: u, message: msg }); },
-        lastUpdate: function () { return API.call('getLastUpdate', {}); },
-        getFerieWindow: function () { return API.call('getFerieWindow', {}); },
-        saveFerieWindow: function (open, from, to) { return API.call('saveFerieWindow', { open: open, dateFrom: from, dateTo: to, requestedBy: CU, requestedByPassword: CU_PWD }); },
-      };
+    const API = {
+      async call(action, data) {
+        if (!data) data = {};
+        try {
+          setSyncing(true);
+          var payload = Object.assign({}, data, { action: action });
+          var resp = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+          });
+          var json = await resp.json();
+          setSyncing(false);
+          if (!json.ok) throw new Error(json.error || 'Errore backend');
+          return json.data;
+        } catch (err) {
+          setSyncing(false);
+          console.error('[API]', action, err);
+          throw err;
+        }
+      },
+      login: function (u, p) { return API.call('login', { username: u, password: p }); },
+      changePwd: function (u, o, n) { return API.call('changePassword', { username: u, oldPassword: o, newPassword: n }); },
+      resetPwd: function (u, p, by, byPwd) { return API.call('resetPassword', { username: u, newPassword: p, requestedBy: by, requestedByPassword: byPwd }); },
+      getUsers: function (u, p) { return API.call('getUsers', { username: u, password: p }); },
+      saveUser: function (u, d, by, byPwd) { return API.call('saveUser', { username: u, userData: d, requestedBy: by, requestedByPassword: byPwd }); },
+      addUser: function (u, d, by, byPwd) { return API.call('addUser', { username: u, userData: d, requestedBy: by, requestedByPassword: byPwd }); },
+      deleteUser: function (u, by, byPwd) { return API.call('deleteUser', { username: u, requestedBy: by, requestedByPassword: byPwd }); },
+      getRatings: function (u, p) { return API.call('getRatings', { username: u, password: p }); },
+      saveRating: function (u, p, target, rating, notes) { return API.call('saveRating', { username: u, password: p, targetUser: target, rating: rating, notes: notes }); },
+      getShifts: function (f, t) { return API.call('getShifts', { dateFrom: f, dateTo: t }); },
+      saveShift: function (d, s, sh, by) { return API.call('saveShift', { dateStr: d, supervisor: s, shiftData: sh, updatedBy: by }); },
+      bulkImport: function (sh, by) { return API.call('bulkImport', { shifts: sh, importedBy: by }); },
+      clearShifts: function () { return API.call('clearShifts', {}); },
+      getExc: function () { return API.call('getExceptions', {}); },
+      saveExc: function (d, by) { return API.call('saveException', { exceptionData: d, createdBy: by }); },
+      deleteExc: function (id) { return API.call('deleteException', { exceptionId: id }); },
+      getReqs: function (l) { return API.call('getRequests', { login: l || '' }); },
+      saveReq: function (d) { return API.call('saveRequest', { requestData: d }); },
+      decideReq: function (id, by, ok) { return API.call('decideRequest', { requestId: id, decidedBy: by, approved: ok }); },
+      getPub: function () { return API.call('getPublished', {}); },
+      savePub: function (wks) { return API.call('savePublished', { publishedWeeks: wks }); },
+      getPubConfig: function () { return API.call('getPublishedConfig', {}); },
+      savePubConfig: function (wk, sups, pub) { return API.call('savePublishedConfig', { weekKey: wk, supervisors: sups, published: pub }); },
+      getNotifs: function (u) { return API.call('getNotifications', { toUser: u }); },
+      addNotif: function (to, msg, fr) { return API.call('addNotification', { toUser: to, message: msg, fromUser: fr }); },
+      markRead: function (u) { return API.call('markRead', { toUser: u }); },
+      slackCh: function (msg) { return API.call('slackChannel', { message: msg }); },
+      slackDM: function (u, msg) { return API.call('slackDM', { username: u, message: msg }); },
+      lastUpdate: function () { return API.call('getLastUpdate', {}); },
+      getFerieWindow: function () { return API.call('getFerieWindow', {}); },
+      saveFerieWindow: function (open, from, to) { return API.call('saveFerieWindow', { open: open, dateFrom: from, dateTo: to, requestedBy: CU, requestedByPassword: CU_PWD }); },
+    };
 
 
-      CACHE.load();
+    CACHE.load();
 
-      const SHIFT_DEFS = [
-        { key: 'NS_A', code: 'NS', sub: '8h', label: 'Notte A', start: '23:30', end: '07:30', cls: 'sc-ns' },
-        { key: 'NS_B', code: 'NS', sub: '8h', label: 'Notte B', start: '00:30', end: '08:30', cls: 'sc-ns' },
-        { key: 'NS_C', code: 'NS', sub: '8h', label: 'Notte 00:00', start: '00:00', end: '08:00', cls: 'sc-ns' },
-        { key: 'NS_7', code: 'NS', sub: '7h', label: 'Notte A 7h', start: '23:30', end: '06:30', cls: 'sc-ns7' },
-        { key: 'NS_B7', code: 'NS', sub: '7h', label: 'Notte B 7h', start: '00:30', end: '07:30', cls: 'sc-ns7' },
-        { key: 'AM', code: 'AM', sub: '8h', label: 'Mattina', start: '06:00', end: '14:00', cls: 'sc-am' },
-        { key: 'AM_7', code: 'AM', sub: '7h', label: 'Mattina 7h', start: '06:00', end: '13:00', cls: 'sc-am7' },
-        { key: 'AM_A', code: 'AM', sub: '8h', label: 'Mattina Alt', start: '08:00', end: '16:00', cls: 'sc-am' },
-        { key: 'CS', code: 'CS', sub: '8h', label: 'CS 14:00', start: '14:00', end: '22:00', cls: 'sc-cs' },
-        { key: 'CS_7', code: 'CS', sub: '7h', label: 'CS 7h', start: '14:00', end: '21:00', cls: 'sc-cs7' },
-        { key: 'PM', code: 'PM', sub: '8h', label: 'PM 16:00', start: '16:00', end: '00:00', cls: 'sc-pm' },
-        { key: 'PM_7', code: 'PM', sub: '7h', label: 'PM 7h', start: '16:00', end: '23:00', cls: 'sc-pm7' },
-        { key: 'FERIE', code: 'FERIE', sub: '', label: 'Ferie', start: '', end: '', cls: 'sc-ferie' },
-        { key: 'FORM', code: 'FORM', sub: '', label: 'Formazione', start: '', end: '', cls: 'sc-form' },
-        { key: 'OFF', code: 'OFF', sub: '', label: 'Riposo', start: '', end: '', cls: 'sc-off' },
-      ];
+    const SHIFT_DEFS = [
+      { key: 'NS_A', code: 'NS', sub: '8h', label: 'Notte A', start: '23:30', end: '07:30', cls: 'sc-ns' },
+      { key: 'NS_B', code: 'NS', sub: '8h', label: 'Notte B', start: '00:30', end: '08:30', cls: 'sc-ns' },
+      { key: 'NS_C', code: 'NS', sub: '8h', label: 'Notte 00:00', start: '00:00', end: '08:00', cls: 'sc-ns' },
+      { key: 'NS_7', code: 'NS', sub: '7h', label: 'Notte A 7h', start: '23:30', end: '06:30', cls: 'sc-ns7' },
+      { key: 'NS_B7', code: 'NS', sub: '7h', label: 'Notte B 7h', start: '00:30', end: '07:30', cls: 'sc-ns7' },
+      { key: 'AM', code: 'AM', sub: '8h', label: 'Mattina', start: '06:00', end: '14:00', cls: 'sc-am' },
+      { key: 'AM_7', code: 'AM', sub: '7h', label: 'Mattina 7h', start: '06:00', end: '13:00', cls: 'sc-am7' },
+      { key: 'AM_A', code: 'AM', sub: '8h', label: 'Mattina Alt', start: '08:00', end: '16:00', cls: 'sc-am' },
+      { key: 'CS', code: 'CS', sub: '8h', label: 'CS 14:00', start: '14:00', end: '22:00', cls: 'sc-cs' },
+      { key: 'CS_7', code: 'CS', sub: '7h', label: 'CS 7h', start: '14:00', end: '21:00', cls: 'sc-cs7' },
+      { key: 'PM', code: 'PM', sub: '8h', label: 'PM 16:00', start: '16:00', end: '00:00', cls: 'sc-pm' },
+      { key: 'PM_7', code: 'PM', sub: '7h', label: 'PM 7h', start: '16:00', end: '23:00', cls: 'sc-pm7' },
+      { key: 'FERIE', code: 'FERIE', sub: '', label: 'Ferie', start: '', end: '', cls: 'sc-ferie' },
+      { key: 'FORM', code: 'FORM', sub: '', label: 'Formazione', start: '', end: '', cls: 'sc-form' },
+      { key: 'OFF', code: 'OFF', sub: '', label: 'Riposo', start: '', end: '', cls: 'sc-off' },
+    ];
 
-      const DAYS_IT = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
-      const MONTHS_IT = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-      const MIN_NS_23 = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 };
-      const MIN_NS_00 = { 0: 2, 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 2 };
-      const MIN_AM = { 0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2 };
-      const MIN_CS = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 };
-      const MIN_PM = { 0: 1, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 1 };
+    const DAYS_IT = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+    const MONTHS_IT = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    const MIN_NS_23 = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 };
+    const MIN_NS_00 = { 0: 2, 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 2 };
+    const MIN_AM = { 0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2 };
+    const MIN_CS = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 };
+    const MIN_PM = { 0: 1, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 1 };
 
-      const NAME_TO_LOGIN = {
-        'giovanni leoncino': 'leoncino', "nicola d'ambrosio": 'nddambro', 'nicola dambrosio': 'nddambro',
-        'carmine martinelli': 'carminma', 'valerio mattei': 'vamattei', 'biagio di micco': 'biamicco',
-        'danilo de simone': 'simdanil', 'caterina allegretto': 'allegrec', 'carmela schiavottiello': 'schcarme',
-        'guido abbate': 'gabbate', 'raffaele forestiero': 'forestir', 'roberta graziano': 'robgrazi',
-        'maria sozio': 'marsozio', 'ernesto marino': 'ermarino', 'gerardo iannone': 'iannong',
-        'nocerino,cristian': 'nocerin', 'nocerino cristian': 'nocerin', 'cristian nocerino': 'nocerin'
-      };
+    const NAME_TO_LOGIN = {
+      'giovanni leoncino': 'leoncino', "nicola d'ambrosio": 'nddambro', 'nicola dambrosio': 'nddambro',
+      'carmine martinelli': 'carminma', 'valerio mattei': 'vamattei', 'biagio di micco': 'biamicco',
+      'danilo de simone': 'simdanil', 'caterina allegretto': 'allegrec', 'carmela schiavottiello': 'schcarme',
+      'guido abbate': 'gabbate', 'raffaele forestiero': 'forestir', 'roberta graziano': 'robgrazi',
+      'maria sozio': 'marsozio', 'ernesto marino': 'ermarino', 'gerardo iannone': 'iannong',
+      'nocerino,cristian': 'nocerin', 'nocerino cristian': 'nocerin', 'cristian nocerino': 'nocerin'
+    };
 
-      const SUP_ORDER = ['leoncino', 'nddambro', 'carminma', 'vamattei', 'biamicco', 'simdanil', 'allegrec', 'schcarme', 'gabbate', 'forestir', 'robgrazi', 'marsozio', 'ermarino', 'iannong', 'nocerin'];
+    const SUP_ORDER = ['leoncino', 'nddambro', 'carminma', 'vamattei', 'biamicco', 'simdanil', 'allegrec', 'schcarme', 'gabbate', 'forestir', 'robgrazi', 'marsozio', 'ermarino', 'iannong', 'nocerin'];
 
-      var CU = null, CU_PWD=null, CU_DATA=null;
-      var editCtx = null, requestCtx=null, resetTarget=null, editUserTarget=null, approveCtx=null;
-      var tempRating = 0, importData=null;
-      var currentReqType = null, ferieSelectedDays=[];
-      var schedYear = new Date().getFullYear();
-      var schedWkFrom = 1, schedWkTo=4;
-      var syncTimer = null, lastSyncTs=null;
+    var CU = null, CU_PWD = null, CU_DATA = null;
+    var editCtx = null, requestCtx = null, resetTarget = null, editUserTarget = null, approveCtx = null;
+    var tempRating = 0, importData = null;
+    var currentReqType = null, ferieSelectedDays = [];
+    var schedYear = new Date().getFullYear();
+    var schedWkFrom = 1, schedWkTo = 4;
+    var syncTimer = null, lastSyncTs = null;
 
-(function () {
-        var w = getOFDWeek(new Date());
-        schedYear = w.year;
-        schedWkFrom = Math.max(1, w.wk - 1);
-        schedWkTo = w.wk + 2;
-      })();
+    (function () {
+      var w = getOFDWeek(new Date());
+      schedYear = w.year;
+      schedWkFrom = Math.max(1, w.wk - 1);
+      schedWkTo = w.wk + 2;
+    })();
 
     function setSyncing(v) {
       if (!CU) return;
